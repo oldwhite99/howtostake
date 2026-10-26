@@ -1,0 +1,37 @@
+name: R5 private cloud assembly contract checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - "automation/r5_private_assembly.py"
+      - ".github/workflows/r5-private-assembly-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify syntax and fail-closed controls without triggering TTS
+        run: |
+          python -m py_compile automation/r5_private_assembly.py
+          python - <<'PY'
+          import os, subprocess, sys
+          cmd=[sys.executable,"automation/r5_private_assembly.py"]
+          for privacy, expected in [
+              ("false", "PRIVATE_REPOSITORY_REQUIRED_FOR_VIDEO_ARTIFACT"),
+              ("true", "R5_ASSET_URL_SECRET_NOT_CONFIGURED"),
+          ]:
+              env={**os.environ,"R5_REPOSITORY_PRIVATE":privacy,"R5_ASSET_URL":""}
+              p=subprocess.run(cmd,env=env,capture_output=True,text=True,timeout=15)
+              if p.returncode==0 or expected not in p.stderr:
+                  raise SystemExit("BLOCKED: fail-closed contract regression "+privacy)
+          print("PASS: syntax + public repo blocked + no asset secret blocked")
+          PY
