@@ -134,6 +134,8 @@ def verify_movie(mp4,output,base_sha):
 
 def main():
     die_if_not_private()
+    if not os.environ.get("R5_ASSET_URL",""):
+        raise ValueError("R5_ASSET_URL_SECRET_NOT_CONFIGURED")
     audio=Path("Aria.zip").resolve()
     if not audio.is_file() or audio.stat().st_size < 10000:
         raise ValueError("AUTHENTIC_CLOUD_ARIA_ZIP_MISSING")
