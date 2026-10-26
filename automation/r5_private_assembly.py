@@ -34,8 +34,6 @@ def sha_bytes(b: bytes) -> str:
 def die_if_not_private():
     if os.environ.get("R5_REPOSITORY_PRIVATE") != "true":
         raise ValueError("PRIVATE_REPOSITORY_REQUIRED_FOR_VIDEO_ARTIFACT")
-    if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
-        raise ValueError("FFMPEG_AND_FFPROBE_REQUIRED")
 
 
 def download_assets():
@@ -136,6 +134,8 @@ def main():
     die_if_not_private()
     if not os.environ.get("R5_ASSET_URL",""):
         raise ValueError("R5_ASSET_URL_SECRET_NOT_CONFIGURED")
+    if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
+        raise ValueError("FFMPEG_AND_FFPROBE_REQUIRED")
     audio=Path("Aria.zip").resolve()
     if not audio.is_file() or audio.stat().st_size < 10000:
         raise ValueError("AUTHENTIC_CLOUD_ARIA_ZIP_MISSING")
