@@ -1,0 +1,5 @@
+-r requirements-rest.txt
+mcp>=1.17,<4
+PyJWT[crypto]>=2.9,<3
+google-cloud-storage>=2.18,<4
+google-auth>=2.30,<3

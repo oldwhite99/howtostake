@@ -1,0 +1,112 @@
+[
+  {
+    "path": ".dockerignore",
+    "bytes": 93,
+    "sha256": "08ecd594efa9546f1145b385c6a5368340f7fdd7629dfc9b244bf229f3159001"
+  },
+  {
+    "path": ".env.example",
+    "bytes": 431,
+    "sha256": "2203d0d840fc439f2daffc81f03fb66c4bb500b1e76736b2cac6044ec27d8984"
+  },
+  {
+    "path": "DEPLOYMENT_AND_CHATGPT.md",
+    "bytes": 4945,
+    "sha256": "64a1b44c9b5f87aba0588054bb3131a42681030daae4d277367020be859f5993"
+  },
+  {
+    "path": "Dockerfile",
+    "bytes": 357,
+    "sha256": "6430af680f52887e1a82fb93885a12ff103a5a78393b7051deb1cad9112d5747"
+  },
+  {
+    "path": "Dockerfile.mcp",
+    "bytes": 333,
+    "sha256": "89a74adc31b23e5669ce7a51b7cbd8b6e6138cae6c597ba51441ab74a076536e"
+  },
+  {
+    "path": "QA_STATUS_R3.json",
+    "bytes": 463,
+    "sha256": "b9ad88d190a64b4da82eebadf287123c2e8625f336cd8cd61820da82a4166d91"
+  },
+  {
+    "path": "README.md",
+    "bytes": 4133,
+    "sha256": "300a9324896fcba5c89928bce6b6ef22b6f8149e67dec74e55e9ed7abeca1b84"
+  },
+  {
+    "path": "REGISTRATION_FALLBACK.md",
+    "bytes": 1354,
+    "sha256": "02e466211c0cbfc8e217afcc48bfbfe3d77083488b36b6df1f4cd0108b7eac87"
+  },
+  {
+    "path": "assemble_r5_edge.py",
+    "bytes": 4317,
+    "sha256": "c5b4c45c2c0ed88ddcbaaa6620c4216b0184af7d3e705487445e156a1ce91e14"
+  },
+  {
+    "path": "core.py",
+    "bytes": 3031,
+    "sha256": "531ba66f65bf08e05e2e7aa1cfd2f0f083b1c0b34313f642f05272e28e018ab2"
+  },
+  {
+    "path": "edge_tts_bridge.py",
+    "bytes": 7679,
+    "sha256": "2fbce4a4bcd52dfde68cb6dac14178ddb1807284beec316d38f4b8c217ed2333"
+  },
+  {
+    "path": "fixtures/morning_routine_188words.json",
+    "bytes": 2389,
+    "sha256": "6a435f8c000a17a0f329f9fc58387cdd7d2d990cb69de2e2e8858e3abdefc774"
+  },
+  {
+    "path": "fixtures/morning_routine_article.txt",
+    "bytes": 915,
+    "sha256": "365fb1317dfece9a06d59bea769d8b7a06b233b4ef4232b451d62379412b9673"
+  },
+  {
+    "path": "mcp_oauth_server.py",
+    "bytes": 4822,
+    "sha256": "7be37eeccbd7981162184f01e29f655ffa3d8fbcbc6e4286fec4c317fe7ca4a8"
+  },
+  {
+    "path": "render.yaml",
+    "bytes": 238,
+    "sha256": "5a82018bd8fbc649c4e9cbc7061fb8e5f18871d73725e6f4e9bb6145767bfcc6"
+  },
+  {
+    "path": "requirements-mcp.txt",
+    "bytes": 111,
+    "sha256": "54d9d2dd96934db03bbb598b4da5ea76f39edeb31f70027fab041ac55e6935ce"
+  },
+  {
+    "path": "requirements-rest.txt",
+    "bytes": 69,
+    "sha256": "1a25c329f0b67eb8a75a7751aa02e9dc488476e3267981ea2f1b9eb65818231d"
+  },
+  {
+    "path": "rest_api.py",
+    "bytes": 3121,
+    "sha256": "7969446c7b79d1c8e062c5cabcd0743b1ece403d1e8e8276d362827db2327b95"
+  },
+  {
+    "path": "smoke_test_render.py",
+    "bytes": 2954,
+    "sha256": "ccb3a7498c0e3304b75302b81b803686488dc7588f26607609cef8e5b5cd3dd5"
+  },
+  {
+    "path": "tests/test_cloud_contract.py",
+    "bytes": 5117,
+    "sha256": "f907f7a7c32c9ee5abc3e7cf9d588284cc27d9b33dec29387011ebee367f3b49"
+  },
+  {
+    "path": "tests/test_render_contract.py",
+    "bytes": 1285,
+    "sha256": "3514345d94b28e4a2f4cb7b46588160ed5169f27df1872bd8072772bce68d031"
+  },
+  {
+    "path": "voice_pilot_4.py",
+    "bytes": 1262,
+    "sha256": "33fcb38ac56214a6fc7dd7a4d3972fde473e946014fe23d1996da67d0b550347"
+  }
+]

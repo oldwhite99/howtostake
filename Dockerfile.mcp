@@ -1,0 +1,9 @@
+FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PORT=8080
+COPY requirements-rest.txt requirements-mcp.txt ./
+RUN pip install --no-cache-dir -r requirements-mcp.txt
+COPY *.py ./
+USER 65532
+# This will fail closed unless JWKS/issuer/resource/GCS are configured.
+CMD ["python","mcp_oauth_server.py"]

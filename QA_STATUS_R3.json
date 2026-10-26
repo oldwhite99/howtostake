@@ -1,0 +1,14 @@
+{
+  "baseline": "R2 independent bridge",
+  "target": "Render Blueprint + REST pilot",
+  "offline_unit_tests": 16,
+  "offline_tests_passed": 16,
+  "source_article_words": 188,
+  "article_sentences": 22,
+  "local_automation_executable": true,
+  "real_edge_audio_generated": false,
+  "live_render_deployed": false,
+  "render_account_connected": false,
+  "chatgpt_mcp_registered": false,
+  "note": "Offline tests use mocked ZIP data and source checks. No live TTS."
+}
