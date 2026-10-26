@@ -14,7 +14,7 @@ permissions:
 jobs:
   synthesize:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     if: github.repository == 'oldwhite99/howtostake'
     steps:
       - uses: actions/checkout@v4
@@ -55,5 +55,28 @@ jobs:
         with:
           name: R5-Aria-voice-${{ github.run_id }}
           path: Aria.zip
+          if-no-files-found: error
+          retention-days: 2
+
+      # R5 visual assets must NEVER be staged in this public repository.
+      # Video assembly is enabled only AFTER migration to a PRIVATE repo
+      # with the approved signed R5_ASSET_URL stored as an Actions secret.
+      - name: Assemble R5 video (private repository only)
+        if: ${{ github.event.repository.private == true }}
+        env:
+          R5_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+          R5_ASSET_URL: ${{ secrets.R5_ASSET_URL }}
+        run: |
+          python automation/r5_private_assembly.py
+      - name: Upload reviewed-source R5 MP4 and QA (private only)
+        if: ${{ github.event.repository.private == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: R5-Aria-Video-${{ github.run_id }}
+          path: |
+            r5_video_delivery/R5_Aria_Cloud.mp4
+            r5_video_delivery/R5_Aria_Full_Timeline.srt
+            r5_video_delivery/R5_Aria_Assembly_QA.json
+            r5_video_delivery/cloud_delivery_qa.json
           if-no-files-found: error
           retention-days: 2
