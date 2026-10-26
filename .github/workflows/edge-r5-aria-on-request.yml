@@ -1,0 +1,59 @@
+name: R5 Aria via Render (approved fixture)
+
+# A new minimal JSON request triggers a real cloud synthesis.
+# This repository is PUBLIC; never commit a secret or private source text.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "automation_requests/*.json"
+
+permissions:
+  contents: read
+
+jobs:
+  synthesize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.repository == 'oldwhite99/howtostake'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate the new request (no untrusted shell args)
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import json, os, re, subprocess
+          from pathlib import Path
+          before, after = os.environ['BEFORE_SHA'], os.environ['AFTER_SHA']
+          if not all(re.fullmatch('[0-9a-f]{40}',x) for x in (before,after)):
+              raise SystemExit('BLOCKED: invalid git SHAs')
+          changed=subprocess.check_output(['git','diff','--name-only','--diff-filter=A',before,after,'--','automation_requests/'],text=True).splitlines()
+          if len(changed)!=1 or not re.fullmatch('automation_requests/[A-Za-z0-9_-]+\\.json',changed[0]):
+              raise SystemExit('BLOCKED: exactly one newly added job JSON is required')
+          req=json.loads(Path(changed[0]).read_text('utf-8'))
+          if req != {'job':'R5_ARIA_188_WORDS_22_SENTENCES','voice':'en-US-AriaNeural'}:
+              raise SystemExit('BLOCKED: unsupported or non-approved job')
+          print('APPROVED_REQUEST:',changed[0])
+          PY
+      - name: Call Render with Actions-secret credentials
+        env:
+          EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
+        run: |
+          test -n "$EDGE_API_KEY" || { echo 'BLOCKED: Set repository Actions secret EDGE_API_KEY'; exit 1; }
+          python smoke_test_render.py \
+            --url https://howtostake.onrender.com \
+            --live --voice en-US-AriaNeural --out Aria.zip
+      - name: Retain only verified voice bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: R5-Aria-voice-${{ github.run_id }}
+          path: Aria.zip
+          if-no-files-found: error
+          retention-days: 2
