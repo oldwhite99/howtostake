@@ -66,21 +66,50 @@ def _srt_timestamp(seconds: float) -> str:
 
 
 def match_boundaries(sentences: list[str], events: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    # Edge may issue sentence chunks rather than exactly 1 event per sentence.
-    # In that case fail closed: do NOT invent/smear timestamps.
-    boundary=[e for e in events if e.get('type') == 'SentenceBoundary']
-    if len(boundary) != len(sentences):
-        raise ValueError(f'REVIEW_REQUIRED: received {len(boundary)} sentence boundaries for {len(sentences)} sentences')
-    timings=[]
-    for index,(source,event) in enumerate(zip(sentences,boundary),1):
-        spoken=event.get('text','')
+    """Use real Edge onsets; resolve only modest metadata-duration overlaps.
+
+    Edge returns both the sentence onset and a nominal duration. Occasionally
+    an end computed from offset+duration extends past the next *real* onset.
+    A subtitle cannot overlap the next speaking sentence, so clip that end to
+    the next observed onset ONLY for bounded overlap and keep raw evidence.
+    Severe overlap/non-monotonic onsets must fail, not be estimated.
+    """
+    boundaries = [e for e in events if e.get('type') == 'SentenceBoundary']
+    if len(boundaries) != len(sentences):
+        raise ValueError(f'REVIEW_REQUIRED: received {len(boundaries)} sentence boundaries for {len(sentences)} sentences')
+    timings = []
+    raw_durations = []
+    for index, (source, event) in enumerate(zip(sentences, boundaries), 1):
+        spoken = event.get('text', '')
         if _normalized_words(source) != _normalized_words(spoken):
             raise ValueError(f'REVIEW_REQUIRED: sentence {index} boundary text differs: expected {source!r}, received {spoken!r}')
-        start=float(event['offset']) / TICKS_PER_SECOND
-        duration=float(event['duration']) / TICKS_PER_SECOND
-        if duration <= 0 or (timings and start < timings[-1]['start_sec']):
-            raise ValueError(f'REVIEW_REQUIRED: invalid timing on sentence {index}')
-        timings.append(dict(index=index,text=source,start_sec=round(start,4),end_sec=round(start+duration,4)))
+        start = float(event['offset']) / TICKS_PER_SECOND
+        duration = float(event['duration']) / TICKS_PER_SECOND
+        if not (start >= 0 and duration > 0) or (timings and start <= timings[-1]['start_sec'] + 0.15):
+            raise ValueError(f'REVIEW_REQUIRED: invalid/non-increasing sentence onset at {index}')
+        timings.append(dict(index=index, text=source, start_sec=round(start, 4), end_sec=round(start + duration, 4)))
+        raw_durations.append(duration)
+    for i in range(len(timings) - 1):
+        current, next_sentence = timings[i], timings[i+1]
+        overlap = current['end_sec'] - next_sentence['start_sec']
+        if overlap <= 0:
+            continue
+        # A large overrun could mean corrupted upstream timing or bad offsets;
+        # never silently repair an arbitrary overlap.
+        allowed_overlap = min(1.5, raw_durations[i] * 0.35)
+        if overlap > allowed_overlap:
+            raise ValueError(
+                f'SENTENCE_DURATION_OVERLAP_REVIEW_REQUIRED: sentence={i+1}, '
+                f'overlap_sec={overlap:.4f}, maximum_auto_adjust_sec={allowed_overlap:.4f}, '
+                f'raw_end_sec={current["end_sec"]:.4f}, '
+                f'next_observed_start_sec={next_sentence["start_sec"]:.4f}'
+            )
+        current['raw_end_sec'] = current['end_sec']
+        current['end_sec'] = next_sentence['start_sec']
+        current['end_clipped_to_observed_next_onset'] = True
+        current['overlap_adjustment_sec'] = round(overlap, 4)
+        if current['end_sec'] <= current['start_sec']:
+            raise ValueError(f'REVIEW_REQUIRED: invalid normalized end on sentence {i+1}')
     return timings
 
 
@@ -98,6 +127,9 @@ def write_outputs(out: Path, plan: dict[str, Any], events: list[dict[str,Any]], 
     (out/'article_voice.srt').write_text('\n'.join(srt),encoding='utf-8')
     result={k:v for k,v in plan.items() if k not in ('text','sentences')}
     result.update(status='SYNTHESIS_AND_ALIGNMENT_COMPLETED_REVIEW_PENDING',
+                  timing_adjustment_count=sum(1 for t in timings if t.get('end_clipped_to_observed_next_onset')),
+                  max_timing_adjustment_sec=max((t.get('overlap_adjustment_sec', 0) for t in timings), default=0),
+                  timing_alignment='OBSERVED_SENTENCE_ONSETS_WITH_BOUNDED_END_CLIPPING',
                   audio_bytes=len(mp3_bytes),boundary_events=len(timings),
                   audio_sha256=hashlib.sha256(mp3_bytes).hexdigest(),
                   outputs=['article_voice.mp3','article_voice.srt','sentence_timings.json','result.json'])
