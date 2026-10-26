@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: ai-english-edge-tts-pilot
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    envVars:
+      - key: EDGE_API_KEY
+        sync: false
