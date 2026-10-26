@@ -61,6 +61,13 @@ jobs:
       # R5 visual assets must NEVER be staged in this public repository.
       # Video assembly is enabled only AFTER migration to a PRIVATE repo
       # with the approved signed R5_ASSET_URL stored as an Actions secret.
+      - name: Install FFmpeg for private video production
+        if: ${{ github.event.repository.private == true }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version | head -1
+          ffprobe -version | head -1
       - name: Assemble R5 video (private repository only)
         if: ${{ github.event.repository.private == true }}
         env:
